@@ -1,0 +1,49 @@
+{
+  "scan_status": "complete",
+  "path": "/private/tmp/diskdiet-home",
+  "overview": false,
+  "entries": [
+    {
+      "scan_status": "complete",
+      "name": "Movies",
+      "path": "/private/tmp/diskdiet-home/Movies",
+      "size": 157286400,
+      "is_dir": true
+    },
+    {
+      "scan_status": "complete",
+      "name": "Downloads",
+      "path": "/private/tmp/diskdiet-home/Downloads",
+      "size": 41943040,
+      "is_dir": true
+    },
+    {
+      "scan_status": "complete",
+      "name": "Library",
+      "path": "/private/tmp/diskdiet-home/Library",
+      "size": 20971520,
+      "is_dir": true
+    },
+    {
+      "scan_status": "complete",
+      "name": "Documents",
+      "path": "/private/tmp/diskdiet-home/Documents",
+      "size": 5242883,
+      "is_dir": true
+    }
+  ],
+  "large_files": [
+    {
+      "name": "video.mov",
+      "path": "/private/tmp/diskdiet-home/Movies/video.mov",
+      "size": 157286400
+    },
+    {
+      "name": "installer.dmg",
+      "path": "/private/tmp/diskdiet-home/Downloads/installer.dmg",
+      "size": 41943040
+    }
+  ],
+  "total_size": 225443843,
+  "total_files": 3
+}

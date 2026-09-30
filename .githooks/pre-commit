@@ -1,0 +1,3 @@
+#!/bin/sh
+# Blocks a commit whose staged changes hold secrets or personal data.
+exec gitleaks git --pre-commit --staged --redact --config "$(dirname "$0")/../.gitleaks.toml"

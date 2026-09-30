@@ -1,0 +1,46 @@
+# Privacy gate for the public product: default secret rules plus personal data.
+
+[extend]
+useDefault = true
+
+[[rules]]
+id = "user-home-path"
+description = "Path inside a named user's home folder"
+regex = '''/Users/[A-Za-z0-9][A-Za-z0-9._-]*'''
+keywords = ["/users/"]
+[[rules.allowlists]]
+regexes = ['''^/Users/Shared''']
+
+[[rules]]
+id = "email-address"
+description = "Email address"
+regex = '''[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}'''
+keywords = ["@"]
+[[rules.allowlists]]
+regexes = ['''@(example\.(com|org|net)|users\.noreply\.github\.com)$''']
+
+[[rules]]
+id = "serial-number"
+description = "Hardware serial number"
+regex = '''(?i:serial[ _-]?num(?:ber)?)[^:=\n]{0,20}[:=]\s*"?[A-Z0-9]{8,17}\b'''
+keywords = ["serial"]
+
+[[rules]]
+id = "hardware-uuid"
+description = "Hardware or volume UUID"
+regex = '''[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}'''
+[[rules.allowlists]]
+regexes = ['''^00000000-0000-0000-0000-0000000000[0-9]{2}$''']
+
+# Planning files stay in the private repo; planted positive controls are
+# scanned by tests/privacy.bats from a temp copy. Both layouts: product folder
+# inside this repo, and the exported repo root.
+[[allowlists]]
+description = "private planning files and positive controls"
+paths = [
+  '''(^|/)plans/''',
+  '''(^|/)specs/''',
+  '''(^|/)\.specify/''',
+  '''(^|/)\.claude/''',
+  '''(^|/)tests/privacy/''',
+]

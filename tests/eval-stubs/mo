@@ -1,0 +1,19 @@
+#!/bin/bash
+# Mole stand-in for the evals: dry runs and lists print test fixtures; a
+# removing call prints one line and changes nothing. The folder it is called
+# from picks the version: old/ reports 1.50.0.
+set -euo pipefail
+fixtures="$(cd "$(dirname "$(readlink -f "$0")")/../fixtures" && pwd)"
+here=$(basename "$(dirname "$0")")
+show() { cat "$fixtures/$1"; }
+case "$*" in
+  --version) if [ "$here" = old ]; then show mo_version_old.txt; else show mo_version.txt; fi ;;
+  "analyze --json "*) show mo_analyze.json ;;
+  "clean --dry-run") show mo_clean_dry_run.txt ;;
+  "purge --dry-run") show mo_purge_dry_run.txt ;;
+  "optimize --dry-run") show mo_optimize_dry_run.txt ;;
+  "uninstall --list") show mo_uninstall_list.json ;;
+  "uninstall --dry-run Example App") cat >/dev/null; show mo_uninstall_dry_run.txt ;;
+  "uninstall --dry-run FakeTool") cat >/dev/null; show mo_uninstall_dry_run_real.txt ;;
+  *) echo "mo stub: $* (nothing changed)" ;;
+esac

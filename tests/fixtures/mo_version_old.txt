@@ -1,0 +1,10 @@
+
+Mole version 1.50.0
+macOS: 27.0
+Architecture: arm64
+Kernel: 27.0.0
+SIP: Enabled
+Disk Free: 80.00GB
+Install: Homebrew
+Shell: /bin/zsh
+

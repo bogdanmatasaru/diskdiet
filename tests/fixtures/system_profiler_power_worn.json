@@ -1,0 +1,95 @@
+{
+  "SPPowerDataType": [
+    {
+      "_name": "spbattery_information",
+      "sppower_battery_charge_info": {
+        "sppower_battery_at_warn_level": "FALSE",
+        "sppower_battery_fully_charged": "FALSE",
+        "sppower_battery_is_charging": "TRUE",
+        "sppower_battery_state_of_charge": 98
+      },
+      "sppower_battery_health_info": {
+        "sppower_battery_cycle_count": 67,
+        "sppower_battery_health": "Service Recommended",
+        "sppower_battery_health_maximum_capacity": "65%"
+      },
+      "sppower_battery_model_info": {
+        "sppower_battery_cell_revision": "271d",
+        "sppower_battery_device_name": "bq40z651",
+        "sppower_battery_firmware_version": "0b00",
+        "sppower_battery_hardware_revision": "0100",
+        "sppower_battery_pack_lot_code": "0000",
+        "sppower_battery_pcb_lot_code": "0000",
+        "sppower_battery_serial_number": "redacted"
+      }
+    },
+    {
+      "_name": "sppower_information",
+      "AC Power": {
+        "Current Power Source": "TRUE",
+        "Disk Sleep Timer": 10,
+        "Display Sleep Timer": 10,
+        "Hibernate Mode": 3,
+        "HighPowerMode": "No",
+        "LowPowerMode": "Yes",
+        "PrioritizeNetworkReachabilityOverSleep": "No",
+        "Sleep On Power Button": "Yes",
+        "System Sleep Timer": 0,
+        "Wake On LAN": "Yes"
+      },
+      "Battery Power": {
+        "Disk Sleep Timer": 10,
+        "Display Sleep Timer": 2,
+        "Hibernate Mode": 3,
+        "HighPowerMode": "No",
+        "LowPowerMode": "Yes",
+        "PrioritizeNetworkReachabilityOverSleep": "No",
+        "ReduceBrightness": "No",
+        "Sleep On Power Button": "Yes",
+        "System Sleep Timer": 1,
+        "Wake On LAN": "No"
+      }
+    },
+    {
+      "_name": "sppower_hwconfig_information",
+      "sppower_ups_installed": "FALSE"
+    },
+    {
+      "_name": "sppower_ac_charger_information",
+      "sppower_ac_charger_family": "0xe000400a",
+      "sppower_ac_charger_firmware_version": "01050036",
+      "sppower_ac_charger_hardware_version": "1.0",
+      "sppower_ac_charger_ID": "0x7016",
+      "sppower_ac_charger_manufacturer": "Apple Inc.",
+      "sppower_ac_charger_name": "67W USB-C Power Adapter",
+      "sppower_ac_charger_serial_number": "redacted",
+      "sppower_ac_charger_watts": "65",
+      "sppower_battery_charger_connected": "TRUE",
+      "sppower_battery_is_charging": "TRUE"
+    },
+    {
+      "_items": [
+        {
+          "_items": [
+            {
+              "appPID": 348,
+              "eventtype": "wake",
+              "scheduledby": "com.apple.alarm.user-invisible-com.apple.acmd.alarm",
+              "time": "2026-09-27T19:06:03Z",
+              "UserVisible": false
+            },
+            {
+              "appPID": 669,
+              "eventtype": "wake",
+              "scheduledby": "com.apple.alarm.user-invisible-com.apple.calaccessd.travelEngine.periodicRefreshTimer",
+              "time": "2026-09-28T02:20:58Z",
+              "UserVisible": false
+            }
+          ],
+          "_name": "sppower_scheduled_events_info"
+        }
+      ],
+      "_name": "sppower_events_info"
+    }
+  ]
+}

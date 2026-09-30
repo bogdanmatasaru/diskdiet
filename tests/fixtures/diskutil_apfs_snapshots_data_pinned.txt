@@ -1,0 +1,7 @@
+Snapshot for disk3s5 (1 found)
+|
++-- 00000000-0000-0000-0000-000000000002
+    Name:        com.apple.TimeMachine.2026-09-01-120000.local
+    XID:         4421000
+    Purgeable:   No
+    NOTE:        This snapshot limits the minimum size of APFS Container disk3

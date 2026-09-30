@@ -1,0 +1,4 @@
+[
+  {"name": "Example App", "bundle_id": "com.example.app", "source": "App", "uninstall_name": "Example App", "path": "/Applications/Example App.app", "size": "16.4MB"},
+  {"name": "FakeTool", "bundle_id": "com.jetbrains.toolbox", "source": "App", "uninstall_name": "FakeTool", "path": "/Applications/FakeTool.app", "size": "8KB"}
+]

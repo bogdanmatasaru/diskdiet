@@ -1,0 +1,12 @@
+→ DRY RUN MODE, No project artifacts will be removed
+
+Purge Project Artifacts
+
+✓ [DRY RUN] /private/tmp/diskdiet-home/Projects/app/node_modules, 5.2MB
+
+
+======================================================================
+Dry run complete - no changes made
+Would free approximately: 5.2MB | Items: 1 | Free: 80.00GB
+======================================================================
+

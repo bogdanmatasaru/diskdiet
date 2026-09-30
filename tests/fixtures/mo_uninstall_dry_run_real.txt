@@ -1,0 +1,22 @@
+→ DRY RUN MODE, No app files or settings will be modified
+
+[2J[H◎ Matched 1 app(s):
+1. FakeTool  8KB  |  Last: Today
+
+Proceed with uninstallation? [y/N] 
+Files to be removed:
+
+◎ FakeTool , 8KB
+  ✓ ~/Applications/FakeTool.app , 8KB
+  ✓ ~/Library/Containers/com.jetbrains.toolbox
+  ✓ ~/Library/Application Support/JetBrains/Toolbox
+  ✓ ~/Library/Caches/JetBrains/Toolbox
+
+➤ Remove 1 app, 8KB  Enter confirm, ESC cancel: 
+
+======================================================================
+Uninstall dry run complete
+Would remove 1 app, would free 8KB: FakeTool
+======================================================================
+
+[DRY RUN] Would refresh LaunchServices and update Dock entries

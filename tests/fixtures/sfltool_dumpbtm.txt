@@ -1,0 +1,158 @@
+========================
+ Records for UID -2 : 00000000-0000-0000-0000-000000000097
+========================
+
+ ServiceManagement migrated: true
+ LaunchServices registered: true
+
+ Items:
+
+ #1:
+                 UUID: 00000000-0000-0000-0000-000000000001
+                 Name: Other agent
+       Developer Name: Example
+      Team Identifier: AAAAAAAAAA
+                 Type: legacy agent (0x10008)
+                Flags: [  ] (0)
+          Disposition: [enabled, allowed, not notified] (0x3)
+           Identifier: 8.com.example.other.agent
+                  URL: (null)
+           Generation: 1
+
+========================
+ Records for UID 0 : 00000000-0000-0000-0000-000000000098
+========================
+
+ ServiceManagement migrated: true
+ LaunchServices registered: true
+
+ Items:
+
+ #1:
+                 UUID: 00000000-0000-0000-0000-000000000002
+                 Name: Root app
+       Developer Name: Example
+      Team Identifier: AAAAAAAAAA
+                 Type: app (0x2)
+                Flags: [  ] (0)
+          Disposition: [enabled, allowed, notified] (0xb)
+           Identifier: 2.com.example.rootapp
+                  URL: (null)
+           Generation: 1
+
+ #2:
+                 UUID: 00000000-0000-0000-0000-000000000003
+                 Name: Root daemon
+       Developer Name: Example
+      Team Identifier: AAAAAAAAAA
+                 Type: legacy daemon (0x10010)
+                Flags: [  ] (0)
+          Disposition: [enabled, allowed, notified] (0xb)
+           Identifier: 16.com.example.daemon
+                  URL: (null)
+           Generation: 1
+
+========================
+ Records for UID 501 : 00000000-0000-0000-0000-000000000099
+========================
+
+ ServiceManagement migrated: true
+ LaunchServices registered: true
+
+ Items:
+
+ #1:
+                 UUID: 00000000-0000-0000-0000-000000000004
+                 Name: Agent
+       Developer Name: Example
+      Team Identifier: AAAAAAAAAA
+                 Type: agent (0x8)
+                Flags: [  ] (0)
+          Disposition: [enabled, allowed, notified] (0xb)
+           Identifier: 8.com.example.agent
+                  URL: (null)
+           Generation: 1
+
+ #2:
+                 UUID: 00000000-0000-0000-0000-000000000005
+                 Name: Legacy agent
+       Developer Name: Example
+      Team Identifier: AAAAAAAAAA
+                 Type: legacy agent (0x10008)
+                Flags: [  ] (0)
+          Disposition: [enabled, allowed, not notified] (0x3)
+           Identifier: 8.com.example.legacy
+                  URL: (null)
+           Generation: 1
+
+ #3:
+                 UUID: 00000000-0000-0000-0000-000000000006
+                 Name: Login item
+       Developer Name: Example
+      Team Identifier: AAAAAAAAAA
+                 Type: login item (0x4)
+                Flags: [  ] (0)
+          Disposition: [enabled, allowed, notified] (0xb)
+           Identifier: 4.com.example.loginitem
+                  URL: (null)
+           Generation: 1
+
+ #4:
+                 UUID: 00000000-0000-0000-0000-000000000007
+                 Name: App
+       Developer Name: Example
+      Team Identifier: AAAAAAAAAA
+                 Type: app (0x2)
+                Flags: [  ] (0)
+          Disposition: [enabled, allowed, notified] (0xb)
+           Identifier: 2.com.example.app
+                  URL: (null)
+           Generation: 1
+
+ #5:
+                 UUID: 00000000-0000-0000-0000-000000000008
+                 Name: Disabled login item
+       Developer Name: Example
+      Team Identifier: AAAAAAAAAA
+                 Type: login item (0x4)
+                Flags: [  ] (0)
+          Disposition: [disabled, allowed, notified] (0xa)
+           Identifier: 4.com.example.off
+                  URL: (null)
+           Generation: 1
+
+ #6:
+                 UUID: 00000000-0000-0000-0000-000000000009
+                 Name: Disabled app
+       Developer Name: Example
+      Team Identifier: AAAAAAAAAA
+                 Type: app (0x2)
+                Flags: [  ] (0)
+          Disposition: [disabled, allowed, not notified] (0x2)
+           Identifier: 2.com.example.offapp
+                  URL: (null)
+           Generation: 1
+
+ #7:
+                 UUID: 00000000-0000-0000-0000-000000000010
+                 Name: User daemon
+       Developer Name: Example
+      Team Identifier: AAAAAAAAAA
+                 Type: daemon (0x10)
+                Flags: [  ] (0)
+          Disposition: [enabled, allowed, notified] (0xb)
+           Identifier: 16.com.example.userdaemon
+                  URL: (null)
+           Generation: 1
+
+ #8:
+                 UUID: 00000000-0000-0000-0000-000000000011
+                 Name: Developer
+       Developer Name: Example
+      Team Identifier: AAAAAAAAAA
+                 Type: developer (0x20)
+                Flags: [  ] (0)
+          Disposition: [enabled, allowed, notified] (0xb)
+           Identifier: Example
+                  URL: (null)
+           Generation: 1

@@ -1,0 +1,3 @@
+#!/bin/bash
+# Homebrew stand-in for the evals: installs nothing.
+echo "brew stub: $* (nothing installed)"

@@ -1,0 +1,14 @@
+{
+  "name": "diskdiet",
+  "description": "The diskdiet Claude Code plugin.",
+  "owner": {
+    "name": "Bogdan Matasaru"
+  },
+  "plugins": [
+    {
+      "name": "diskdiet",
+      "source": "./",
+      "description": "Audit and clean a Mac step by step with Mole."
+    }
+  ]
+}

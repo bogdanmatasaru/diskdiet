@@ -1,0 +1,2 @@
+Planted positive control:
+  "sppower_battery_serial_number" : "F8ABCD0123456789"

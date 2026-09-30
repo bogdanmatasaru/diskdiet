@@ -1,0 +1,4 @@
+{
+  // Eval prompts and grader rubrics are plain text for the eval runner, not pages.
+  "config": { "MD041": false }
+}

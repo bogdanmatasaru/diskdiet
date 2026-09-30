@@ -1,0 +1,7 @@
+{
+  "config": {
+    "default": true,
+    // Tables and command lines run long; wrapping them hurts more than it helps.
+    "MD013": false
+  }
+}

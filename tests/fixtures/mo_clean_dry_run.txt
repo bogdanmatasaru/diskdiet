@@ -1,0 +1,7 @@
+======================================================================
+Dry run complete - no changes made
+Potential space: 1KB | Items: 1 | Categories: 1
+Detailed file list: /private/tmp/diskdiet-home/.config/mole/clean-list.txt
+Use mo clean --whitelist to add protection rules
+======================================================================
+

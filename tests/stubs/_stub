@@ -1,0 +1,25 @@
+#!/bin/bash
+# Stand-in for a system tool. Logs its argv to $STUB_LOG and prints the fixture
+# named by STUB_<TOOL>_<ARGS> (argv upper-cased, non-alphanumeric runs as _),
+# falling back to STUB_<TOOL>. No fixture set: exits 1 like an unreadable tool.
+{ set +x; } 2>/dev/null # kcov turns on xtrace via BASH_ENV; keep traces out of stub output
+set -euo pipefail
+
+tool=$(basename "$0")
+if [ -n "${STUB_LOG:-}" ]; then
+  printf '%s %s\n' "$tool" "$*" >>"$STUB_LOG"
+fi
+
+key() { printf '%s' "$*" | tr '[:lower:]' '[:upper:]' | tr -cs 'A-Z0-9' '_' | sed 's/^_*//; s/_*$//'; }
+
+base="STUB_$(key "$tool")"
+args=$(key "$*")
+for var in "${base}_${args}" "$base"; do
+  eval "fixture=\${$var:-}"
+  if [ -n "$fixture" ]; then
+    cat "$fixture"
+    exit 0
+  fi
+done
+echo "$tool: no fixture set ($base)" >&2
+exit 1

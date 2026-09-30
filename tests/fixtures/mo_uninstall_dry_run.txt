@@ -1,0 +1,8 @@
+[0;34m◎[0m Example App [0;90m, 16.4MB[0m
+
+  [0;32m✓[0m /Applications/Example App.app [0;90m, 12.3MB[0m
+  [0;32m✓[0m ~/Library/Containers/com.example.app [0;90m, 4.0MB[0m
+  [0;32m✓[0m ~/Library/Containers/com.example.app.widget
+  [0;32m✓[0m ~/Library/Application Support/Example App [0;90m, 512KB[0m
+  [0;34m◎[0m System: /Library/LaunchDaemons/com.example.app.helper.plist
+  [0;33m◎[0m Review only: /Library/Application Support/Example
