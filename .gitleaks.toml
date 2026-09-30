@@ -34,7 +34,8 @@ regexes = ['''^00000000-0000-0000-0000-0000000000[0-9]{2}$''']
 
 # Planning files stay in the private repo; planted positive controls are
 # scanned by tests/privacy.bats from a temp copy. Both layouts: product folder
-# inside this repo, and the exported repo root.
+# inside this repo, and the exported repo root. kcov writes coverage/ with
+# absolute paths while the suite runs.
 [[allowlists]]
 description = "private planning files and positive controls"
 paths = [
@@ -43,4 +44,5 @@ paths = [
   '''(^|/)\.specify/''',
   '''(^|/)\.claude/''',
   '''(^|/)tests/privacy/''',
+  '''(^|/)coverage/''',
 ]
