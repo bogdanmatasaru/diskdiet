@@ -17,7 +17,7 @@ jobs:
           fetch-depth: 0
 
       - name: Install tools
-        run: brew install bats-core kcov gitleaks markdownlint-cli2 bash shellcheck mole
+        run: brew update --quiet && brew install bats-core kcov gitleaks markdownlint-cli2 bash shellcheck mole
 
       - name: shellcheck
         run: shellcheck -s bash skills/diskdiet/scripts/*.sh tests/stubs/* tests/eval-stubs/mo tests/eval-stubs/brew evals/run.sh tests/*.bash tests/*.bats tests/smoke.sh .githooks/pre-commit

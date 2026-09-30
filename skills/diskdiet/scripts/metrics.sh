@@ -12,7 +12,7 @@ NL=$'\n'
 usage() {
   echo "usage: metrics.sh collect | mole-total | evaluate --before B --after A --target T --stages S" >&2
   echo "       metrics.sh report --before B --after A|- --target T --stages S [--previous P] --out DIR" >&2
-  echo "       metrics.sh save RUN/<file> < content" >&2
+  echo "       metrics.sh save RUN/<file> < content | show RUN/<file>" >&2
   exit 2
 }
 
@@ -329,30 +329,55 @@ report() {
   echo "$out/$stamp.json"
 }
 
-# save <file>: stdin into <file>, only a plain file name directly inside a run
-# folder that `mktemp -d "$TMPDIR/diskdiet-XXXXXX"` made. The skill writes
-# through this instead of a shell redirect, which Claude Code prompts for.
-save() {
-  [ $# -eq 1 ] || usage
-  local dir name content
-  # Read first: stdin can take long, so the checks run right before the write.
-  content=$(cat)
-  dir=$(dirname "$1")
-  name=$(basename "$1")
+# in_run <verb> <file>: exits 2 unless <file> is a plain file name directly
+# inside a run folder that `mktemp -d "$TMPDIR/diskdiet-XXXXXX"` made.
+in_run() {
+  local dir name
+  dir=$(dirname "$2")
+  name=$(basename "$2")
   case $(basename "$dir")/$name in
     diskdiet-??????/[!.]*) case $name in *[!A-Za-z0-9._-]*) dir="" ;; esac ;;
     *) dir="" ;;
   esac
-  if [ -z "$dir" ] || [ ! -d "$dir" ] || [ -L "$dir" ] || [ -L "$1" ] ||
+  if [ -z "$dir" ] || [ ! -d "$dir" ] || [ -L "$dir" ] || [ -L "$2" ] ||
     [ "$(cd "$dir/.." && pwd -P)" != "$(cd "${TMPDIR:-/tmp}" && pwd -P)" ]; then
-    echo "metrics.sh: save: not a file in a diskdiet run folder: $1" >&2
+    echo "metrics.sh: $1: not a file in a diskdiet run folder: $2" >&2
     exit 2
   fi
+}
+
+# save <file>: stdin into <file> of a run folder. The skill writes through this
+# instead of a shell redirect, which Claude Code prompts for.
+save() {
+  [ $# -eq 1 ] || usage
+  local content
+  # Read first: stdin can take long, so the checks run right before the write.
+  content=$(cat)
+  in_run save "$1"
   if [ -z "$content" ]; then
     echo "metrics.sh: save: no input for $1" >&2
     exit 2
   fi
   write "$1" "$content"
+}
+
+# show <file>: prints <file> of a run folder or a report in
+# ~/Library/Logs/diskdiet. Both are outside the working folder, where Claude
+# Code prompts for every Read, cat or jq.
+show() {
+  [ $# -eq 1 ] || usage
+  local dir
+  dir=$(dirname "$1")
+  if [ -d "$dir" ] && [ ! -L "$1" ] && [ "$(cd "$dir" && pwd -P)" = "$(cd "$HOME/Library/Logs" 2>/dev/null && pwd -P)/diskdiet" ]; then
+    :
+  else
+    in_run show "$1"
+  fi
+  [ -f "$1" ] || {
+    echo "metrics.sh: show: no such file: $1" >&2
+    exit 2
+  }
+  cat "$1"
 }
 
 [ -x "$JQ" ] || {
@@ -374,6 +399,10 @@ case ${1:-} in
   save)
     shift
     save "$@"
+    ;;
+  show)
+    shift
+    show "$@"
     ;;
   *) usage ;;
 esac

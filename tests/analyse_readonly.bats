@@ -28,7 +28,8 @@ seed_home() {
 # unchanged: every seeded file still exists with the same content.
 unchanged() { (cd "$HOME" && shasum -c --quiet "$BATS_TEST_TMPDIR/seeded"); }
 
-# run_analyse: every command line of analyse.cmds, in order.
+# run_analyse: every command line of the Analyse block in SKILL.md, in order.
+# shellcheck disable=SC2016 # literal backticks from SKILL.md
 run_analyse() {
   local line
   while IFS= read -r line; do
@@ -37,7 +38,7 @@ run_analyse() {
       echo "failed: $line" >&2
       return 1
     }
-  done <"$CLAUDE_SKILL_DIR/scripts/analyse.cmds"
+  done < <(sed -n '/^## 2\. Analyse/,/^## 3\./p' "$CLAUDE_SKILL_DIR/SKILL.md" | sed -n '/^```sh$/,/^```$/p' | grep -v '^```')
 }
 
 # new_paths: paths under HOME that were not seeded.

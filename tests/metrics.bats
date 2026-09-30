@@ -888,3 +888,40 @@ run_dir() {
   run_script "$METRICS" save "$RUN/a.json" "$RUN/b.json" <<<'{}'
   [ "$status" -eq 2 ]
 }
+
+@test "show: prints a file of the run folder" {
+  run_dir
+  printf '{"free_gb":80}' >"$RUN/before.json"
+  run_script "$METRICS" show "$RUN/before.json"
+  [ "$status" -eq 0 ]
+  [ "$output" = '{"free_gb":80}' ]
+}
+
+@test "show: refuses any file outside a run folder, and a missing one" {
+  run_dir
+  mkdir -p "$TMPDIR/other"
+  echo secret >"$TMPDIR/other/x.json"
+  ln -s "$HOME/.zshrc" "$RUN/link.json"
+  for f in "$TMPDIR/other/x.json" "$RUN/link.json" "$RUN/../other/x.json" "$RUN/none.json" x.json; do
+    run_script "$METRICS" show "$f"
+    [ "$status" -eq 2 ] || { echo "not refused: $f" >&2; return 1; }
+    [[ "$output" != *secret* ]]
+  done
+  run_script "$METRICS" show
+  [ "$status" -eq 2 ]
+}
+
+@test "show: prints a report from ~/Library/Logs/diskdiet, nothing else there" {
+  mkdir -p "$HOME/Library/Logs/diskdiet" "$HOME/Library/Logs/other"
+  echo '# report' >"$HOME/Library/Logs/diskdiet/2026-09-30-120000.md"
+  echo secret >"$HOME/Library/Logs/other/x.md"
+  ln -s "$HOME/Library/Logs/other/x.md" "$HOME/Library/Logs/diskdiet/link.md"
+  run_script "$METRICS" show "$HOME/Library/Logs/diskdiet/2026-09-30-120000.md"
+  [ "$status" -eq 0 ]
+  [ "$output" = '# report' ]
+  for f in "$HOME/Library/Logs/other/x.md" "$HOME/Library/Logs/diskdiet/link.md" "$HOME/Library/Logs/diskdiet/../other/x.md"; do
+    run_script "$METRICS" show "$f"
+    [ "$status" -eq 2 ] || { echo "not refused: $f" >&2; return 1; }
+    [[ "$output" != *secret* ]]
+  done
+}

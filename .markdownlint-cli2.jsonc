@@ -2,6 +2,8 @@
   "config": {
     "default": true,
     // Tables and command lines run long; wrapping them hurts more than it helps.
-    "MD013": false
+    "MD013": false,
+    // Keep a Changelog repeats Added/Fixed/Changed under every release.
+    "MD024": { "siblings_only": true }
   }
 }

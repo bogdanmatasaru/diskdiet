@@ -4,6 +4,14 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-09-30
+
+### Fixed
+
+- Installed from GitHub, the skill stopped at the analyse stage: it read its own command list and the run-folder JSON files, both outside the working folder, so Claude Code asked for every read or, in headless mode, denied it. The analyse commands now live in SKILL.md, and run-folder files and the final report are read with the new `metrics.sh show`.
+- The eval runner no longer grants Read, `cat` or `jq`, so the evals see the same permissions as a real install.
+- CI runs `brew update` before installing, so it tests the current Mole release instead of the runner's stale 1.53.0.
+
 ## [0.2.0] - 2026-09-30
 
 ### Fixed

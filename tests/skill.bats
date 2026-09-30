@@ -66,9 +66,9 @@ granted() {
   grep -qF 'tmutil deletelocalsnapshots <date>' "$SKILL_MD"
 }
 
-@test "SKILL.md and analyse.cmds redirect no file; writes go through metrics.sh save" {
+@test "SKILL.md redirects no file; writes go through metrics.sh save" {
   # shellcheck disable=SC2016 # a literal $RUN in the pattern
-  run grep -nE '(^|[^0-9&])[<>] *"?(RUN|\$RUN)/' "$SKILL_MD" "$TESTS_DIR/../skills/diskdiet/scripts/analyse.cmds"
+  run grep -nE '(^|[^0-9&])[<>] *"?(RUN|\$RUN)/' "$SKILL_MD"
   [ "$status" -eq 1 ]
   granted "\${CLAUDE_SKILL_DIR}/scripts/metrics.sh save \"/tmp/diskdiet-abc123/before.json\"" "$SKILL_MD"
   granted "mo analyze --json \"\$HOME\"" "$SKILL_MD"

@@ -38,6 +38,7 @@ Audit and clean this Mac in fixed stages with [Mole](https://github.com/tw93/Mol
 - Shell variables do not survive between commands. Write the run folder path out in full in every command.
 - Run long commands (`mo analyze`, `mo clean`) with a 10-minute Bash timeout.
 - Never write or read a file with a shell redirect (`>`, `>>`, `<`) or the Write or Edit tools: Claude Code asks the owner for each one. Write run-folder files by piping into `${CLAUDE_SKILL_DIR}/scripts/metrics.sh save "RUN/<file>"`, which replaces the file.
+- Read run-folder files only with `${CLAUDE_SKILL_DIR}/scripts/metrics.sh show "RUN/<file>"`. The run folder is outside the working folder, so the Read tool, `cat` or `jq` on it make Claude Code ask the owner.
 
 ## 1. Preflight
 
@@ -49,7 +50,20 @@ Run `command -v mo jq` and `mo --version`. Nothing is written in this step.
 
 ## 2. Analyse (no changes)
 
-Create the run folder with `mktemp -d "$TMPDIR/diskdiet-XXXXXX"`; call its printed path RUN. Then run the commands in `${CLAUDE_SKILL_DIR}/scripts/analyse.cmds` in order, from `metrics.sh collect` onwards, with RUN written out:
+Create the run folder with `mktemp -d "$TMPDIR/diskdiet-XXXXXX"`; call its printed path RUN. Then run these commands in order, from `metrics.sh collect` onwards, with RUN written out. None of them changes a user file.
+
+```sh
+command -v mo jq
+mo --version
+${CLAUDE_SKILL_DIR}/scripts/metrics.sh collect | ${CLAUDE_SKILL_DIR}/scripts/metrics.sh save "$RUN/before.json"
+mo analyze --json "$HOME" | ${CLAUDE_SKILL_DIR}/scripts/metrics.sh save "$RUN/analyze.json"
+diskutil apfs list
+tmutil listlocalsnapshots /
+mo clean --dry-run | ${CLAUDE_SKILL_DIR}/scripts/metrics.sh mole-total
+${CLAUDE_SKILL_DIR}/scripts/freespace.sh --free "$FREE_GB" --swap "$SWAP_GB" --caches "$CACHES_GB" | ${CLAUDE_SKILL_DIR}/scripts/metrics.sh save "$RUN/target.json"
+```
+
+What each output gives:
 
 - `before.json` gives `free_gb` (FREE_GB) and `swap_used_gb` (SWAP_GB).
 - `analyze.json`: if `scan_status` is `partial`, say the scan was partial.
@@ -101,4 +115,4 @@ Run `${CLAUDE_SKILL_DIR}/scripts/metrics.sh collect | ${CLAUDE_SKILL_DIR}/script
 
 ## 9. Report
 
-Run `${CLAUDE_SKILL_DIR}/scripts/metrics.sh report --before "RUN/before.json" --after "RUN/after.json" --target "RUN/target.json" --stages "RUN/stages.json" --out "$HOME/Library/Logs/diskdiet"`. It prints the JSON path; show the `.md` next to it. If the write fails (for example a full disk), show the summary inline and say where it could not be written. When the run stops early, pass `--after -`.
+Run `${CLAUDE_SKILL_DIR}/scripts/metrics.sh report --before "RUN/before.json" --after "RUN/after.json" --target "RUN/target.json" --stages "RUN/stages.json" --out "$HOME/Library/Logs/diskdiet"`. It prints the JSON path; show the `.md` next to it with `${CLAUDE_SKILL_DIR}/scripts/metrics.sh show "<path>.md"`. If the write fails (for example a full disk), show the summary inline and say where it could not be written. When the run stops early, pass `--after -`.

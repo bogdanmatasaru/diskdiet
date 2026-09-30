@@ -1,6 +1,6 @@
 {
   "name": "diskdiet",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Audit and clean a Mac step by step with Mole: analyse, preview, clean on an explicit yes, then health checks and a report.",
   "author": {
     "name": "Bogdan Matasaru"
