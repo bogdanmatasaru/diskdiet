@@ -18,8 +18,8 @@ setup() {
 }
 
 @test "product folder has no leaks" {
-  run gitleaks dir "$PRODUCT_DIR" --config "$CONFIG" --redact --no-banner
-  [ "$status" -eq 0 ]
+  run gitleaks dir "$PRODUCT_DIR" --config "$CONFIG" --redact --no-banner -v
+  [ "$status" -eq 0 ] || { echo "$output"; return 1; }
 }
 
 @test "pre-commit hook blocks a staged user home path" {
