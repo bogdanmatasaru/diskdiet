@@ -36,6 +36,7 @@ Audit and clean this Mac in fixed stages with [Mole](https://github.com/tw93/Mol
 - Photos libraries, `~/Library/Containers` and every path in `~/.config/mole/whitelist` are never removed, moved or changed, even if the owner asks. The only exception is the containers of an app the owner picked in the uninstall stage.
 - A removing Mole command that refuses, needs a terminal, or runs past 10 minutes is not retried: print the exact command for the owner to run in their own terminal and record the stage as `skipped`.
 - Shell variables do not survive between commands. Write the run folder path out in full in every command.
+- Run each command exactly as written, one per Bash call: no `;`, `&&` or `echo` added around it. Each extra piece is a command the skill does not grant, so Claude Code asks the owner for it.
 - Run long commands (`mo analyze`, `mo clean`) with a 10-minute Bash timeout.
 - Never write or read a file with a shell redirect (`>`, `>>`, `<`) or the Write or Edit tools: Claude Code asks the owner for each one. Write run-folder files by piping into `${CLAUDE_SKILL_DIR}/scripts/metrics.sh save "RUN/<file>"`, which replaces the file.
 - Read run-folder files only with `${CLAUDE_SKILL_DIR}/scripts/metrics.sh show "RUN/<file>"`. The run folder is outside the working folder, so the Read tool, `cat` or `jq` on it make Claude Code ask the owner.

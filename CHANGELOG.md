@@ -4,6 +4,12 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ## [Unreleased]
 
+## [0.2.2] - 2026-09-30
+
+### Fixed
+
+- The skill ran some commands chained with `;`, `&&` or `echo`, which the skill does not grant, so Claude Code asked the owner or, in headless mode, denied them. SKILL.md now says to run each command exactly as written, one per Bash call, and the eval runner no longer grants `echo`.
+
 ## [0.2.1] - 2026-09-30
 
 ### Fixed

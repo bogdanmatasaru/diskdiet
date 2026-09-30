@@ -13,7 +13,7 @@ allow=(
   "Bash($root/skills/diskdiet/scripts/freespace.sh *)"
   "Bash(mo *)" "Bash(brew install *)" "Bash(command -v *)" "Bash(printf *)"
   "Bash(mktemp -d \"\$TMPDIR/diskdiet-XXXXXX\")" "Bash(df -k *)" "Bash(diskutil apfs list)" "Bash(tmutil listlocalsnapshots *)"
-  "Bash(mdls -name kMDItemCFBundleIdentifier -raw *)" "Bash(echo *)" Skill
+  "Bash(mdls -name kMDItemCFBundleIdentifier -raw *)" Skill
 )
 # Results name local paths; keep them out of the product folder (privacy scan).
 out=$(mktemp -d "${TMPDIR:-/tmp}/diskdiet-evals-XXXXXX")
