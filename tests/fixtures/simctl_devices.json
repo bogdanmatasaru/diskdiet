@@ -1,0 +1,13 @@
+{
+  "devices": {
+    "com.apple.CoreSimulator.SimRuntime.iOS-26-0": [
+      {"udid": "00000000-0000-0000-0000-000000000001", "dataPath": "/private/tmp/simdev/1/data", "name": "Old Shutdown", "state": "Shutdown", "lastUsedAt": "2020-01-01T00:00:00Z", "dataPathSize": 1073741824, "isAvailable": true},
+      {"udid": "00000000-0000-0000-0000-000000000002", "dataPath": "/private/tmp/simdev/2/data", "name": "Old Booted", "state": "Booted", "lastUsedAt": "2020-01-01T00:00:00Z", "dataPathSize": 1073741824, "isAvailable": true},
+      {"udid": "00000000-0000-0000-0000-000000000003", "dataPath": "/private/tmp/simdev/3/data", "name": "Recent Shutdown", "state": "Shutdown", "lastUsedAt": "2099-01-01T00:00:00Z", "dataPathSize": 1073741824, "isAvailable": true}
+    ],
+    "com.apple.CoreSimulator.SimRuntime.iOS-18-0": [
+      {"udid": "00000000-0000-0000-0000-000000000004", "dataPath": "/private/tmp/simdev/4/data", "name": "Never Used", "state": "Shutdown", "dataPathSize": 1073741824, "isAvailable": true},
+      {"udid": "00000000-0000-0000-0000-000000000005", "dataPath": "/private/tmp/simdev/5/data", "name": "Old Too", "state": "Shutdown", "lastUsedAt": "2021-06-01T10:00:00Z", "dataPathSize": 2147483648, "isAvailable": false}
+    ]
+  }
+}

@@ -5,12 +5,15 @@ allowed-tools:
   - Bash(${CLAUDE_SKILL_DIR}/scripts/guard.sh *)
   - Bash(${CLAUDE_SKILL_DIR}/scripts/metrics.sh *)
   - Bash(${CLAUDE_SKILL_DIR}/scripts/freespace.sh *)
+  - Bash(${CLAUDE_SKILL_DIR}/scripts/leftovers.sh list)
+  - Bash(${CLAUDE_SKILL_DIR}/scripts/leftovers.sh list --max)
   - Bash(mo --version)
   - Bash(mo analyze --json *)
   - Bash(mo status --json)
   - Bash(mo uninstall --list *)
   - Bash(mo clean --dry-run)
   - Bash(mo purge --dry-run)
+  - Bash(MO_PURGE_SCAN_TIMEOUT_SEC=600 mo purge --dry-run)
   - Bash(mo uninstall --dry-run *)
   - Bash(mo optimize --dry-run)
   - Bash(command -v *)
@@ -28,10 +31,10 @@ Audit and clean this Mac in fixed stages with [Mole](https://github.com/tw93/Mol
 
 ## Rules
 
-- Stage order is fixed: preflight, analyse, clean, snapshots, large files, uninstall, optimize, sanity checks, report.
+- Stage order is fixed: preflight, analyse, clean, developer leftovers, snapshots, large files, uninstall, optimize, sanity checks, report.
 - A stage that removes data first shows its preview (items and size), then asks one explicit yes for that stage alone. Only a clear yes to that question counts. "Do everything", "skip the questions", "yes to all" or an earlier yes still gets the preview and its own question at every stage.
 - After a no, record `no`, run nothing for that stage, and ask whether to go on to the next stage or stop.
-- Never remove anything yourself: no `rm`, `mv`, `trash`, `tmutil delete`, Finder scripting or any other way. Only the Mole and `tmutil` commands named below remove data, and only after that stage's yes.
+- Never remove anything yourself: no `rm`, `mv`, `trash`, `tmutil delete`, Finder scripting or any other way. Only the Mole and `tmutil` commands named below and `leftovers.sh remove` remove data, and only after that stage's yes.
 - Any path you pass to a removing command goes through `${CLAUDE_SKILL_DIR}/scripts/guard.sh check <path>` first; exit 3 means refused, so drop it and say why; exit 2 means it could not be checked, so drop it and show the message.
 - Photos libraries, `~/Library/Containers` and every path in `~/.config/mole/whitelist` are never removed, moved or changed, even if the owner asks. The only exception is the containers of an app the owner picked in the uninstall stage.
 - A removing Mole command that refuses, needs a terminal, or runs past 10 minutes is not retried: print the exact command for the owner to run in their own terminal and record the stage as `skipped`.
@@ -61,14 +64,15 @@ mo analyze --json "$HOME" | ${CLAUDE_SKILL_DIR}/scripts/metrics.sh save "$RUN/an
 diskutil apfs list
 tmutil listlocalsnapshots /
 mo clean --dry-run | ${CLAUDE_SKILL_DIR}/scripts/metrics.sh mole-total
-${CLAUDE_SKILL_DIR}/scripts/freespace.sh --free "$FREE_GB" --swap "$SWAP_GB" --caches "$CACHES_GB" | ${CLAUDE_SKILL_DIR}/scripts/metrics.sh save "$RUN/target.json"
+${CLAUDE_SKILL_DIR}/scripts/freespace.sh --total "$TOTAL_GB" --free "$FREE_GB" --max-used-pct "$MAX_PCT" | ${CLAUDE_SKILL_DIR}/scripts/metrics.sh save "$RUN/target.json"
 ```
 
 What each output gives:
 
-- `before.json` gives `free_gb` (FREE_GB) and `swap_used_gb` (SWAP_GB).
+- `before.json` gives `total_gb` (TOTAL_GB) and `free_gb` (FREE_GB): the APFS container's size and free space.
+- MAX_PCT is the most of the disk the owner wants used, a whole number from 1 to 99. Before `freespace.sh`, ask: "How full may the disk be at most, in percent?" with 40 as the recommended option, unless the owner already named a percent in this conversation. When `total_gb` or `free_gb` is null, skip `freespace.sh`, say the target is unknown, and treat `gap_gb` as unknown in stage 4.
 - `analyze.json`: if `scan_status` is `partial`, say the scan was partial.
-- The `mo clean --dry-run | metrics.sh mole-total` line gives CACHES_GB (a number or `unknown`, pass it as is). It is an upper bound: some of it may sit in paths protected in stage 3.
+- The `mo clean --dry-run | metrics.sh mole-total` line gives the caches Mole would clean, an upper bound: some of it may sit in paths protected in stage 3.
 - `freespace.sh` writes `target.json`.
 
 Show the top 10 `entries` of `analyze.json` by size, the local snapshots, free space, the target and the gap, and the `formula` text. Create `RUN/stages.json` with `printf '%s' '<json>' | ${CLAUDE_SKILL_DIR}/scripts/metrics.sh save "RUN/stages.json"`, holding `[{"name":"analyse","preview_gb":null,"preview_items":null,"answer":"not_applicable","freed_gb":null,"errors":[]}]`.
@@ -78,11 +82,18 @@ Every later stage appends one object with the same fields to `RUN/stages.json` a
 ## 3. Clean
 
 1. Run `${CLAUDE_SKILL_DIR}/scripts/guard.sh whitelist`, even when the owner already said no to this stage: later stages rely on it. Show the added lines. The first time, say: "I am adding protected paths to Mole's whitelist files in ~/.config/mole. They stay there after this audit." Any exit other than 0: record the stage as `skipped` without running `mo clean` or `mo purge`, show the message and ask the owner whether to go on or stop.
-2. Preview: `mo clean --dry-run` and `mo purge --dry-run`, each total through `| ${CLAUDE_SKILL_DIR}/scripts/metrics.sh mole-total`. Show both totals and the main categories; the full clean list is in `~/.config/mole/clean-list.txt`.
+2. Preview: `mo clean --dry-run` and `mo purge --dry-run`, each total through `| ${CLAUDE_SKILL_DIR}/scripts/metrics.sh mole-total`. When the purge preview says `Dry run incomplete`, its 60-second project scan ran out: preview again with `MO_PURGE_SCAN_TIMEOUT_SEC=600 mo purge --dry-run`, and use the same prefix on `mo purge --yes` below. Show both totals and the main categories; the full clean list is in `~/.config/mole/clean-list.txt`.
 3. Ask: "Remove these caches and build leftovers (up to X GB)?" Say the total is an upper bound: Mole skips the caches of apps that are running (for example Xcode DerivedData while Xcode runs), so the space freed can be much less.
-4. On yes: `mo clean`, then `mo purge --yes` (without `--yes` Mole's purge refuses when there is no terminal). On no: record `no`.
+4. On yes: `mo clean`, then `mo purge --yes`, with the timeout prefix when the preview needed it (without `--yes` Mole's purge refuses when there is no terminal). On no: record `no`.
 
-## 4. Snapshots
+## 4. Developer leftovers
+
+1. Run `${CLAUDE_SKILL_DIR}/scripts/leftovers.sh list`, or `${CLAUDE_SKILL_DIR}/scripts/leftovers.sh list --max` when the owner asked to free as much as possible or `target.json` `gap_gb` is above 0. `--max` drops the 30-day rule for simulators and DerivedData: every shut-down simulator device not used in the last 2 hours, all of DerivedData, and every ready simulator runtime but the newest of its platform, unless used in the last 2 hours or a booted simulator runs on it. Worktrees keep their 30-day rule. It finds developer files Mole does not clean: Android emulators and system images, Claude Code temp folders, macOS temp folders (`$TMPDIR/tmp.*`, `pytest-of-*`), Claude's VM bundles, Gradle caches, LM Studio models, the npm cache, Playwright browsers, uv's cache, build folders under ~/Projects that git ignores and that hold no tracked file (`node_modules`, `build`, `.build`, `DerivedData`, `Pods`, `.venv`, `target`, `dist`, `.next`), Xcode device support, Xcode Previews, XcodeBuildMCP data, Xcode DerivedData of projects not built for 30 days, git worktrees under ~/Projects unchanged for 30 days with no changed, untracked, ignored or hidden file, no submodule, and every commit on a remote or in the branch checked out in the repo's main folder, simulator runtimes unused for 30 days, and simulator devices shut down and unused for 30 days. Exit 2: record `skipped`, show the message and ask whether to go on or stop.
+2. Show each item with its `gb`, its `count` of units (`in_use` and `protected` say how many are kept) and its listed units (path, `gb`); only the 10 biggest units are listed. A unit with `in_use` true changed in the last 2 hours and is kept; its size is not measured. A unit with `protected` set is kept: show the reason. When the reason starts with `refused:`, say the owner can remove the matching line from `~/.config/mole/whitelist` to clean it on a later run. Show the `simulator_runtimes` lines when not null, with `simulator_runtimes_gb` as their total (null: unknown), and each `simulator_devices` entry (name, `gb`) with `simulator_devices_gb` as their total. Show `restart_gb` as "macOS temp folders hold up to X GB; restarting the Mac clears them." It is an upper bound: `du` counts every APFS clone in full, so the real gain shows only in the stage's `freed_gb`. Chrome's `code_sign_clone` folders are left out of it: they share their blocks with Chrome and deleting them frees nothing. No items, no runtimes and no devices: record `not_applicable`.
+3. Ask which item ids to remove, `simulator-runtimes` only when `simulator_runtimes` is a non-empty array, `simulator-devices` only when `simulator_devices` is a non-empty array (none is fine: record `no`). Say that LM Studio models, Android emulators and system images come back only by downloading or creating them again, and that a removed simulator device loses the apps and data installed in it.
+4. On a pick: `${CLAUDE_SKILL_DIR}/scripts/leftovers.sh remove <id>...` with the picked ids, as `remove --max <id>...` when step 1 listed with `--max`, and without it when step 1 did not: the two modes pick different simulators and runtimes. It checks every unit and every device's folder with `guard.sh check`, skips units in use, removes worktrees with `git worktree remove`, simulator devices with `xcrun simctl delete` and, under `--max`, each listed runtime with `xcrun simctl runtime delete <id>`. Show `removed`, `skipped` with each reason, and `errors`.
+
+## 5. Snapshots
 
 Only if `before.json` `snapshots.count` is above 0; else record `not_applicable`. The deletion takes no path, so `guard.sh check` does not apply.
 
@@ -90,11 +101,11 @@ Only if `before.json` `snapshots.count` is above 0; else record `not_applicable`
 2. Ask: "Delete these N local Time Machine snapshots?"
 3. On yes, for each shown snapshot: `tmutil deletelocalsnapshots <date>` with its `date` from `before.json`; never `/` or any other target, which would also delete snapshots taken since the preview. A snapshot whose `date` is null is not deleted; say so. Then `tmutil listlocalsnapshots /`; shown names present again go into the stage's `recreated`.
 
-## 5. Large files (list only)
+## 6. Large files (list only)
 
 List `analyze.json` `large_files` (no key means none) with size and path, and suggest the owner review them in Finder. Never remove any of them, even when asked: say this audit only lists large files and the owner can delete them in Finder. Record `not_applicable`.
 
-## 6. Uninstall
+## 7. Uninstall
 
 1. Run `mo uninstall --list`, show the apps, and ask which to remove (none is fine: record `no`).
 2. For each picked app, take `uninstall_name` and `bundle_id` from the list (fallback `mdls -name kMDItemCFBundleIdentifier -raw '<path>'`). Drop the app, saying why, when its name or path holds a `'` or a control character, or its bundle id holds anything but letters, digits, `.` and `-`: those cannot be passed safely. Run `printf 'y\n' | mo uninstall --dry-run '<uninstall_name>' | ${CLAUDE_SKILL_DIR}/scripts/metrics.sh save "RUN/uninstall-<bundle_id>.txt"` (the `y` answers Mole's own question; nothing is removed in a dry run), show the file, then run `${CLAUDE_SKILL_DIR}/scripts/guard.sh uninstall-check --allow-app <bundle_id> --preview "RUN/uninstall-<bundle_id>.txt"`.
@@ -103,17 +114,17 @@ List `analyze.json` `large_files` (no key means none) with size and path, and su
 5. On yes, for each kept app right before its uninstall: run the dry run again into `RUN/uninstall-<bundle_id>-final.txt`, then `${CLAUDE_SKILL_DIR}/scripts/guard.sh uninstall-check --allow-app <bundle_id> --shown "RUN/uninstall-<bundle_id>.txt" --preview "RUN/uninstall-<bundle_id>-final.txt"`. Exit 3 (a path the owner did not see, or a protected one) or 2: drop that app, show the message, and do not ask again in this stage.
 6. Then `printf 'y\n\n' | mo uninstall '<uninstall_name>' ...` for the apps still kept. Record in `apps` every `~/Library/Containers/<id>` id their previews listed.
 
-## 7. Optimize
+## 8. Optimize
 
-1. Run `${CLAUDE_SKILL_DIR}/scripts/guard.sh whitelist` again, whatever stage 3 did (it adds only missing lines). Any exit other than 0: record `skipped`, show the message and go on to stage 8.
-2. Preview: `mo optimize --dry-run`. If it does not show `Skipped (whitelisted): Permission Repair`, record `skipped`, say Permission Repair is not excluded, and go on to stage 8 without asking.
+1. Run `${CLAUDE_SKILL_DIR}/scripts/guard.sh whitelist` again, whatever stage 3 did (it adds only missing lines). Any exit other than 0: record `skipped`, show the message and go on to stage 9.
+2. Preview: `mo optimize --dry-run`. If it does not show `Skipped (whitelisted): Permission Repair`, record `skipped`, say Permission Repair is not excluded, and go on to stage 9 without asking.
 3. Ask: "Run these maintenance tasks? macOS may show a password dialog for the admin ones; cancelling it skips only those."
 4. On yes: `mo optimize`. On no: record `no`.
 
-## 8. Sanity checks
+## 9. Sanity checks
 
 Run `${CLAUDE_SKILL_DIR}/scripts/metrics.sh collect | ${CLAUDE_SKILL_DIR}/scripts/metrics.sh save "RUN/after.json"`, then `${CLAUDE_SKILL_DIR}/scripts/metrics.sh evaluate --before "RUN/before.json" --after "RUN/after.json" --target "RUN/target.json" --stages "RUN/stages.json"`. Show the checks as a table: name, status, value.
 
-## 9. Report
+## 10. Report
 
 Run `${CLAUDE_SKILL_DIR}/scripts/metrics.sh report --before "RUN/before.json" --after "RUN/after.json" --target "RUN/target.json" --stages "RUN/stages.json" --out "$HOME/Library/Logs/diskdiet"`. It prints the JSON path; show the `.md` next to it with `${CLAUDE_SKILL_DIR}/scripts/metrics.sh show "<path>.md"`. If the write fails (for example a full disk), show the summary inline and say where it could not be written. When the run stops early, pass `--after -`.

@@ -4,6 +4,29 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-11-09
+
+### Added
+
+- `leftovers.sh` finds five more kinds of leftovers: uv's cache (`uv-cache`), Xcode DerivedData of projects not built for 30 days (`xcode-derived-data`; Mole skips all of DerivedData while Xcode runs), git worktrees under `~/Projects` unchanged for 30 days with no changed, untracked, ignored or skip-worktree file, no submodule, and every commit on a remote or the main worktree's HEAD (`git-worktrees`, removed with `git worktree remove`; repos whose own config sets filters, diff drivers, includes, a partial clone, remote programs or an ssh command are not scanned, nor worktrees with submodules, and git runs with fsmonitor, hooks and lazy fetches off), and simulator devices shut down and unused for 30 days (`simulator_devices` in the list, `simulator-devices` removed with `xcrun simctl delete` after `guard.sh` checks each device folder).
+- `leftovers.sh list --max` and `remove --max <id>...` drop the 30-day rule for simulators and DerivedData: every shut-down simulator device not used in the last 2 hours, all of DerivedData, and every ready simulator runtime but the newest of its platform, unless used in the last 2 hours or a booted simulator runs on it (deleted one by one with `xcrun simctl runtime delete <id>`). The skill uses it when the owner asks to free as much as possible or the target is not met.
+- New leftovers: `xcode-previews` (Xcode UserData/Previews), `xcodebuildmcp`, `tmpdir-temp` (`$TMPDIR/tmp.*` and `pytest-of-*`), `npm-cache` (`~/.npm/_cacache`) and `project-build-dirs` (build output folders under `~/Projects` that git ignores and that hold no tracked file and no git checkout of their own, for when `mo purge` runs out of time).
+- The clean stage previews `mo purge` again with `MO_PURGE_SCAN_TIMEOUT_SEC=600` when Mole reports `Dry run incomplete`, so build folders in big project trees are no longer missed.
+
+### Changed
+
+- The free-space target is the owner's choice: `freespace.sh --total GB --free GB --max-used-pct N` keeps the disk at most N% used, replacing the fixed 40+10+swap+caches formula. `--swap` and `--caches` are gone.
+- `leftovers.sh list` checks the temp folders with one `find` and measures every unit not in use with one `du -l`, instead of three processes per unit (2,000 temp folders list in about 1 s); a hard-linked file counts in every unit that holds it.
+- Simulator devices are deleted one `simctl delete` at a time, skipping any whose folder changed in the last 2 hours; each failure names its device.
+- `restart_gb` leaves out Chrome's `code_sign_clone` folders, which share their blocks with Chrome (deleting 109 of them freed 0 GB), and the temp folders listed as `tmpdir-temp`.
+- `restart_gb` is shown as an upper bound: `du` counts APFS clones in macOS temp folders in full.
+
+## [0.3.0] - 2026-10-19
+
+### Added
+
+- A developer leftovers stage after clean. The new `leftovers.sh list` measures what Mole does not clean: Android emulators and system images, LM Studio models, Xcode device support, Playwright browsers, Gradle caches, the Claude desktop VM bundle and Claude Code's temp folder, plus old simulator runtimes and the space a restart frees. `leftovers.sh remove <id>...` removes the ids the owner picks, skipping every path `guard.sh` refuses and every path changed in the last 120 minutes. `DISKDIET_CLAUDE_TMP` overrides the Claude Code temp folder; the folder is skipped when it is a symlink or not owned by you.
+
 ## [0.2.2] - 2026-09-30
 
 ### Fixed

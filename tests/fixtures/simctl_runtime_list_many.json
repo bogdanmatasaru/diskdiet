@@ -1,0 +1,6 @@
+{
+  "00000000-0000-0000-0000-000000000011": {"identifier": "00000000-0000-0000-0000-000000000011", "runtimeIdentifier": "com.apple.CoreSimulator.SimRuntime.test-11", "platformIdentifier": "com.apple.platform.iphonesimulator", "version": "26.5", "state": "Ready", "deletable": true, "sizeBytes": 1073741824},
+  "00000000-0000-0000-0000-000000000012": {"identifier": "00000000-0000-0000-0000-000000000012", "runtimeIdentifier": "com.apple.CoreSimulator.SimRuntime.test-12", "platformIdentifier": "com.apple.platform.iphonesimulator", "version": "27.1", "state": "Ready", "deletable": true, "sizeBytes": 1073741824},
+  "00000000-0000-0000-0000-000000000013": {"identifier": "00000000-0000-0000-0000-000000000013", "runtimeIdentifier": "com.apple.CoreSimulator.SimRuntime.test-13", "platformIdentifier": "com.apple.platform.iphonesimulator", "version": "9.3", "state": "Ready", "deletable": true, "sizeBytes": 2147483648},
+  "00000000-0000-0000-0000-000000000014": {"identifier": "00000000-0000-0000-0000-000000000014", "runtimeIdentifier": "com.apple.CoreSimulator.SimRuntime.test-14", "platformIdentifier": "com.apple.platform.watchsimulator", "version": "11.0", "state": "Ready", "deletable": true, "sizeBytes": 1073741824}
+}

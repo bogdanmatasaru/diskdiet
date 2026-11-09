@@ -161,14 +161,18 @@ kcov has no branch coverage for bash, so every `if`, `case`, `&&` and `||` arm i
 | Function | Branch | Arm | Test |
 | --- | --- | --- | --- |
 | `number` | `case` | not a number | freespace: negative or non-numeric argument exits 2 |
-| `number` | `case` | number | freespace: target is 40+10+swap+caches |
+| `number` | `case` | number | freespace: target keeps the disk at most N% used |
+| `number` | `-le 9` | 10 or more whole digits | freespace: a size of 10 or more digits exits 2 |
 | main | `-ge 2 \|\|` | option without value | freespace: missing argument exits 2 |
-| main | `case` | `--free`, `--swap`, `--caches` | freespace: arguments in any order |
+| main | `case` | `--total`, `--free`, `--max-used-pct` | freespace: arguments in any order |
 | main | `case` | unknown option | freespace: unknown option exits 2 |
-| main | `if` caches | `unknown` | freespace: caches unknown counted as 0 |
-| main | `if` caches | number | freespace: target is 40+10+swap+caches |
 | main | `if ! number` | missing argument | freespace: missing argument exits 2 |
-| main | `if ! number` | valid | freespace: target is 40+10+swap+caches |
+| main | `if ! number` | valid | freespace: target keeps the disk at most N% used |
+| main | `case` percent | 1-99 | freespace: target keeps the disk at most N% used |
+| main | `case` percent | 0, 100 or more, decimal | freespace: percent outside 1-99 exits 2 |
+| main | `case` total | zero | freespace: zero total exits 2 |
+| main | `awk f <= t \|\|` | free above total | freespace: more free space than the disk holds exits 2 |
+| main | `awk f <= t \|\|` | free at most total | freespace: more free space than the disk holds exits 2 |
 | `evaluate` | `[ $# -ge 2 ] \|\|` | flag without value | evaluate: missing or unreadable input exits 2 |
 | `evaluate` | `case` flag | `--before`, `--after`, `--target`, `--stages` | evaluate: healthy metrics pass every check in order |
 | `evaluate` | `case` flag | unknown | evaluate: missing or unreadable input exits 2 |
@@ -235,9 +239,9 @@ kcov has no branch coverage for bash, so every `if`, `case`, `&&` and `||` arm i
 | `report` | md blockers | `not_applicable` stage left out | report: Markdown names what still blocks the target |
 | main | `-x jq \|\|` | missing | freespace: missing jq exits 2 |
 | jq | `ceil` | fraction rounded up | freespace: target rounded up, decimals accepted |
-| jq | `ceil` | whole | freespace: whole target not rounded further |
+| jq | `ceil` | whole | freespace: target keeps the disk at most N% used |
 | jq | `max` | gap 0 | freespace: gap never negative |
-| jq | `max` | gap positive | freespace: target is 40+10+swap+caches |
+| jq | `max` | gap positive | freespace: target keeps the disk at most N% used |
 
 ## metrics.sh
 
@@ -323,3 +327,151 @@ kcov has no branch coverage for bash, so every `if`, `case`, `&&` and `||` arm i
 | `write` | `mktemp` | planted temp-name symlink | save: a planted temp-name symlink is never followed |
 | `write` | `mktemp` | concurrent writers | save: concurrent saves to one file all succeed |
 | main | `case` | unknown | usage error exits 2 |
+
+## leftovers.sh
+
+| Function | Branch | Arm | Test |
+| --- | --- | --- | --- |
+| main | `if -z HOME` | unset or empty | unset HOME exits 2 |
+| main | `case` | `list` with arguments, `remove` without ids, unknown, none | usage errors exit 2 |
+| main | `if --max` | `--max` after the command | leftovers max: DerivedData built in the last 30 days is a unit |
+| main | `if --max` | another flag, or `remove --max` without ids | leftovers max: a bad flag or remove without ids exits 2 |
+| main | `if dir` | pattern character in TMPDIR | a glob character in TMPDIR exits 2 |
+| `catalog` | `if -n TEMP && ! -L && -O` | TMPDIR set, ours: temp lines added | Xcode previews, XcodeBuildMCP, temp folders and the npm cache are units |
+| `catalog` | `if -n TEMP && ! -L && -O` | no TMPDIR | no TMPDIR leaves restart space unknown |
+| `catalog` | `if -n TEMP && ! -L && -O` | TMPDIR a symlink | temp folders in a TMPDIR that is a symlink are not units |
+| `load_units` | `if xcode-derived-data && MAX = 0 && recent` | `--max`: recent DerivedData kept as a unit | leftovers max: DerivedData built in the last 30 days is a unit |
+| `build_dirs` | `while read -d ''` | no build folder | nothing found lists no items and measures restart space |
+| `build_dirs` | `NL \|\|` | path with a newline | a build folder whose path holds a newline is not a unit |
+| `build_dirs` | `cd root \|\|` | no Projects folder | nothing found lists no items and measures restart space |
+| `build_dirs` | `top == root/?*` | repo above the scan root | a build folder ignored only by a repo above Projects is not a unit |
+| `build_dirs` | `rev-parse \|\|` | not in a repo | git-ignored build folders under Projects with no tracked file are units |
+| `build_dirs` | `&&` chain | repo config runs programs | a build folder in a repo whose config runs programs is not a unit |
+| `build_dirs` | `&&` chain | holds its own .git | a build folder that is its own git checkout is not a unit |
+| `build_dirs` | `&&` chain | holds a bare repo (`*.git`) | a build folder holding a bare git repo is not a unit |
+| `build_dirs` | `&&` chain | find cannot read a subfolder | a build folder with a subfolder find cannot read is not a unit |
+| `build_dirs` | `&&` chain | ls-files fails | a build folder git cannot list the files of is not a unit |
+| `build_dirs` | `&&` chain | not ignored | git-ignored build folders under Projects with no tracked file are units |
+| `build_dirs` | `&&` chain | holds a tracked file | git-ignored build folders under Projects with no tracked file are units |
+| `build_dirs` | `&&` chain | ignored, nothing tracked | git-ignored build folders under Projects with no tracked file are units |
+| `load_units` | `if git-worktrees \|\| project-build-dirs` | `project-build-dirs` | git-ignored build folders under Projects with no tracked file are units |
+| `restart_kb` | `du -I` | code-sign clone left out | Chrome code-sign clones are left out of restart space |
+| `restart_kb` | `du -I` | other folder counted | other folders in X count toward restart space |
+| `old_runtimes` | `\|\| return 1` | device list fails: no runtime deleted | leftovers max: a runtime whose devices simctl cannot list is not deleted |
+| `old-runtimes.jq` | `select` UUID | an id that is not a UUID: left out | leftovers max: a runtime id that is not a UUID is never deleted |
+| `old-runtimes.jq` | `select` booted | a booted device runs on it: left out | leftovers max: a runtime a booted device runs on is neither listed nor deleted |
+| `old_runtimes` | `state != Shutdown` | a device booting or shutting down on it: left out | leftovers max: a runtime a device is booting or shutting down on is not deleted |
+| `old-runtimes.jq` | `group_by` | older runtimes of a platform | leftovers max: every runtime but the newest of its platform is listed and sized |
+| `old-runtimes.jq` | `group_by` | one runtime per platform | leftovers max: one runtime per platform lists none and deletes nothing, no error |
+| `old-runtimes.jq` | `select` ready | not ready, not deletable, or a field of the wrong type: left out | leftovers max: only ready, deletable runtimes unused for 2 hours are deleted, the newest ready one kept |
+| `old-runtimes.jq` | `select` lastUsedAt | used in the last 2 hours: kept | leftovers max: only ready, deletable runtimes unused for 2 hours are deleted, the newest ready one kept |
+| `old-runtimes.jq` | `select` lastUsedAt | older, or never used | leftovers max: only ready, deletable runtimes unused for 2 hours are deleted, the newest ready one kept |
+| `list` | `if xcode-select` | succeeds | simulator runtimes preview comes from simctl's dry run, sized from its list |
+| `list` | `if MAX = 1 && old_runtimes` | runtime list succeeds | leftovers max: every runtime but the newest of its platform is listed and sized |
+| `list` | `if MAX = 1 && old_runtimes` | runtime list fails | leftovers max: a runtime list simctl cannot give leaves runtimes unknown |
+| `list` | `elif MAX = 0 && simctl` | dry run succeeds | simulator runtimes preview comes from simctl's dry run, sized from its list |
+| `list` | `elif MAX = 0 && simctl` | dry run fails | nothing found lists no items and measures restart space |
+| `list` | `if sim != null` | runtimes listed: sized from the runtime list | simulator runtimes preview comes from simctl's dry run, sized from its list |
+| `list` | `if sim != null` | unknown: no runtime list | leftovers max: a runtime list simctl cannot give leaves runtimes unknown |
+| `remove` | `elif MAX = 1` (runtimes) | list fails | leftovers max: a runtime list simctl cannot give is an error, nothing deleted |
+| `remove` | `if delete` (runtimes) | succeeds | leftovers max: old runtimes are deleted one by one, the newest kept |
+| `remove` | `if delete` (runtimes) | fails: error names the runtime | leftovers max: each runtime delete is reported, a failure does not hide the ones deleted |
+| `remove` | `deleted = 0 \|\|` | none deleted: not removed | leftovers max: a failing runtime delete is reported as an error |
+| `remove` | `deleted = 0 \|\|` | one deleted: removed | leftovers max: each runtime delete is reported, a failure does not hide the ones deleted |
+| `remove` | `-n udid \|\|` | no old runtime: neither removed nor error | leftovers max: one runtime per platform lists none and deletes nothing, no error |
+| `old-devices.jq` | `$max == 1` | every shut-down device, never-used ones too | leftovers max: every shut-down simulator device is listed, booted or just used ones are kept |
+| `old-devices.jq` | `if $max == 1` age | used in the last 2 hours: kept | leftovers max: every shut-down simulator device is listed, booted or just used ones are kept |
+| `load_units` | `if wanted` | id not asked for | remove deletes old units, skips in-use and protected ones |
+| `load_units` | `if ! -e && ! -L` | path without a glob is missing | nothing found lists no items and measures restart space |
+| `load_units` | `if claude-tmp` | symlink or another owner | a claude temp folder that is a symlink or not ours is skipped |
+| `load_units` | `if ! -e && ! -L` | dangling symlink kept | a dangling symlink is still a unit |
+| `load_units` | `if *NL*` | newline in the name | a path with a newline in its name is never a unit |
+| `restart_kb` | `du \|\| true` | du fails | a size du cannot measure is null and not counted |
+| `restart_kb` | `du -I tmp.* -I pytest-of-*` | listed temp folders left out | temp folders counted as units are left out of restart space |
+| `in_use` | `-n find` | changed recently | remove deletes old units, skips in-use and protected ones |
+| `in_use` | `-n find` | old | remove deletes old units, skips in-use and protected ones |
+| `in_use` | `find \|\| return 0` | find cannot read a folder: in use | a unit holding a folder find cannot read is in use, never partly removed |
+| `in_use` | `-e \|\| -L \|\| return 1` | missing path: not in use | simulator devices are removed by simctl delete with their udids |
+| `list` | `if tmpdir-temp` | temp folder: batched find | thousands of temp folders are listed in under 60 s |
+| `list` | `elif in_use` | other unit in use | units in use are never measured, however many |
+| `list` | `elif in_use` | other unit not in use | size comes from du, summed over removable units only, not measured in use |
+| `list` | `if temp -gt 0` | no temp folder | size comes from du, summed over removable units only, not measured in use |
+| `list` | `if paths` | units found: one du for all not in use | size comes from du, summed over removable units only, not measured in use |
+| `list` | `if paths` | no unit | nothing found lists no items and measures restart space |
+| `check_units` | `if TEMP allowed` | allowed: plain temp folders skip guard | Xcode previews, XcodeBuildMCP, temp folders and the npm cache are units |
+| `check_units` | `if TEMP allowed` | a rule inside TEMP: every temp folder checked | a whitelisted temp folder is protected |
+| `check_units` | `if tmpdir-temp && ! -L` | a temp folder that is a symlink is checked | a temp folder that links to a protected folder is protected |
+| `check_units` | `if tmpdir-temp && ! -L` | another unit under TEMP is checked | a folder under TMPDIR reached through a symlink still goes through guard |
+| `check_units` | `if -gt 0` (check) | nothing left to check | Xcode previews, XcodeBuildMCP, temp folders and the npm cache are units |
+| `leftover-units.jq` | `mode` | `idle`: units not in use go to du | units in use are never measured, however many |
+| `leftover-units.jq` | `if rc` | 0: not protected | list groups every catalog path by id with its units |
+| `leftover-units.jq` | `if rc` | 3: this path's refusal lines | a whitelisted path is marked protected |
+| `leftover-units.jq` | `if rc` | other: could not check | a guard that cannot check marks every listed unit with its first line |
+| `leftover-units.jq` | `$recent[$path]` | a changed path under the unit: in use, size not counted | size comes from du, summed over removable units only, not measured in use |
+| `leftover-units.jq` | `$recent[$path]` | nothing changed | list groups every catalog path by id with its units |
+| `leftover-units.jq` | `capture` | du gave no line for the unit: kb null | a size du cannot measure is null and not counted |
+| `check_units` | no paths | none loaded | nothing found lists no items and measures restart space |
+| `refusal` | `if rc` | 0 | remove deletes old units, skips in-use and protected ones |
+| `refusal` | `if rc` | 3, line for this path | a whitelisted path is marked protected |
+| `refusal` | `if rc` | 3, line for another path | remove deletes old units, skips in-use and protected ones |
+| `refusal` | `if rc` | other | a guard that cannot check skips the unit |
+| `restart_kb` | `-n TMPDIR \|\|` | unset | no TMPDIR leaves restart space unknown |
+| `restart_kb` | `-n "$t$x" \|\|` | nothing measured | a size du cannot measure is null and not counted |
+| `list` | `if xcode-select` | fails | without developer tools xcrun is never called |
+| `list` | `runtimes \|\|` | runtime list fails | a runtime list simctl cannot give leaves runtime size unknown |
+| `remove` | `if id` | `simulator-runtimes` | simulator runtimes are removed by simctl, not rm |
+| `remove` | `if id` | not in the catalog | an unknown id removes nothing and exits 2 |
+| `remove` | `if refusal` | refused | remove deletes old units, skips in-use and protected ones |
+| `remove` | `if in_use` | in use | remove deletes old units, skips in-use and protected ones |
+| `remove` | `if rm` | fails | a failed removal is reported as an error |
+| `remove` | `if simctl` | succeeds | simulator runtimes are removed by simctl, not rm |
+| `remove` | `if simctl` | fails | a failing simctl is reported as an error |
+| `remove` | `if simctl` | no matching images | no old simulator runtime is not an error |
+| `worktrees` | `-n repo \|\|` | no repo under the root | nothing found lists no items and measures restart space |
+| `worktrees` | `case` | `worktree`, `HEAD`, blank line | a clean, old worktree whose commits are on main or a remote is a unit |
+| `worktrees` | `case` | `locked` | a worktree with changes, hidden, ignored or skip-worktree files, submodules, unpushed commits, recent files, a lock, no folder, a filter in its repo config or no main HEAD is not a unit |
+| `worktrees` | `if first` (HEAD line) | linked worktree, HEAD ignored | a clean, old worktree whose commits are on main or a remote is a unit |
+| `worktrees` | `if first` | main worktree block | a clean, old worktree whose commits are on main or a remote is a unit |
+| `worktrees` | `elif` | locked; recent (also a repo git cannot read: no folder to walk); `.gitmodules`; own filter config; skip-worktree or assume-unchanged file; gitlink (mode 160000); `git status` fails (folder gone); changed, hidden untracked or ignored files; commits only here; `rev-list` fails (no main HEAD) | a worktree with changes, hidden, ignored or skip-worktree files, submodules, unpushed commits, recent files, a lock, no folder, a filter in its repo config or no main HEAD is not a unit |
+| `worktrees` | `elif` | removable, on main or on a remote | a clean, old worktree whose commits are on main or a remote is a unit |
+| `load_units` | `if git-worktrees` | paths from git | a clean, old worktree whose commits are on main or a remote is a unit |
+| `load_units` | `if xcode-derived-data && recent` | changed in the last 30 days | DerivedData of a project built in the last 30 days is not a unit |
+| `load_units` | `if xcode-derived-data && recent` | older, or another id | list groups every catalog path by id with its units |
+| `recent` | `find \|\|` | find fails | a worktree with changes, hidden, ignored or skip-worktree files, submodules, unpushed commits, recent files, a lock, no folder, a filter in its repo config or no main HEAD is not a unit |
+| `own_drivers` | grep | local filter set | a filter in a repo's config never runs during the scan |
+| `old_devices` | `xcode-select \|\|` | fails | without developer tools xcrun is never called |
+| `old_devices` | pipeline | simctl fails | a device list simctl cannot give leaves simulator devices unknown |
+| `old_devices` | pipeline | succeeds | simulator devices shut down and unused for 30 days are listed with their size |
+| `remove` | `if id` | `simulator-devices` | simulator devices are removed by simctl delete with their udids |
+| `remove` | `if git-worktrees` | git removes it | remove takes a worktree out through git, not rm |
+| `remove` | `if git-worktrees` | git refuses | a worktree git refuses to remove is reported as an error |
+| `remove` | `-e \|\| removed` | git fails but the folder is gone | a worktree gone after a failed git remove counts as removed |
+| `remove` | `if why` (devices) | device folder refused | a device whose data folder guard refuses is skipped, not deleted |
+| `old-devices.jq` | `select` | udid not a UUID, no udid, size not a number | a device record with a bad udid or size is never listed or deleted |
+| `remove` | `if devices` | no developer tools | without developer tools simulator devices are an error, xcrun never called |
+| `remove` | `if devices` | device list fails | a failing simctl delete or device list is reported as an error |
+| `remove` | `deleted = 0 \|\|` (devices) | no old device | no old simulator device deletes nothing |
+| `remove` | `elif in_use` (devices) | device folder changed in the last 2 hours | a device whose folder changed in the last 2 hours is skipped, not deleted |
+| `remove` | `elif delete` (devices) | succeeds, one simctl delete per udid | simulator devices are removed by simctl delete with their udids |
+| `remove` | `elif delete` (devices) | fails: error names the udid | a failing simctl delete or device list is reported as an error |
+| `remove` | `deleted = 0 \|\|` (devices) | one deleted, another failed: removed and error | each device delete is reported, a failure does not hide the ones deleted |
+| `git_quiet` | (none) | fsmonitor in the repo config is not run | a repo's own git config never runs a command during the scan |
+| `worktrees` | `case` | blank lines only (git cannot read the repo) | a repo git cannot read never brings back the previous repo's worktree |
+| `load_units` | `if git-worktrees` | any other id: glob expands | list groups every catalog path by id with its units |
+| `own_drivers` | grep | no local driver | a clean, old worktree whose commits are on main or a remote is a unit |
+| `own_drivers` | `grep -v system\|global` | driver only in the global config | a driver in the owner's global git config does not hide worktrees |
+| `remove` | `-e \|\| removed` | folder still there after git fails | a worktree git refuses to remove is reported as an error |
+| `remove` | `if git-worktrees` | any other id: `rm -rf` | remove deletes old units, skips in-use and protected ones |
+| `remove` | `while read udid && read p` | pairs read, then end of output | simulator devices are removed by simctl delete with their udids |
+| `remove` | `if why` (devices) | not refused | simulator devices are removed by simctl delete with their udids |
+| `old-devices.jq` | `select` | `dataPath` not an absolute one-line path | a device record with a bad udid or size is never listed or deleted |
+| `own_drivers` | grep | partial clone, remote program or ssh command in the repo config | a repo whose config can make git fetch or run a program is never scanned |
+| `load_units` | `if git-worktrees` (`set -f`) | worktree path with a pattern character | a worktree path with a pattern character stays literal |
+| main | `if dir` | pattern character, backslash or newline in HOME or the claude temp folder | a glob character, backslash or newline in HOME or the claude temp folder exits 2 |
+| `remove` | `if id` | newline in the id | an unknown id removes nothing and exits 2 |
+| `worktrees` | `elif` | newline in the worktree path | a newline in a worktree path never makes another path a unit |
+| `worktrees` | `elif` | `.git` folder of any case below the top | a worktree holding a .git folder git status cannot see is not a unit |
+| `worktrees` | `find "$1/"` | Projects is a symlink | a Projects folder that is a symlink is scanned |
+| `load_units` | `sort -u` | same worktree from two `.git` folders | a worktree reached from two .git folders is one unit |
+| `old-devices.jq` | `select(length == 1)` | not one JSON document | a device list of two documents leaves devices unknown, a repeated device is deleted once |
+| `old-devices.jq` | `unique_by` | repeated udid | a device list of two documents leaves devices unknown, a repeated device is deleted once |

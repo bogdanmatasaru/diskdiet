@@ -9,7 +9,7 @@ stubs="$root/tests/eval-stubs"
 claude_bin=$(command -v claude)
 system_path=/usr/bin:/bin:/usr/sbin:/sbin
 allow=(
-  "Bash($root/skills/diskdiet/scripts/guard.sh *)" "Bash($root/skills/diskdiet/scripts/metrics.sh *)"
+  "Bash($root/skills/diskdiet/scripts/guard.sh *)" "Bash($root/skills/diskdiet/scripts/metrics.sh *)" "Bash($root/skills/diskdiet/scripts/leftovers.sh *)"
   "Bash($root/skills/diskdiet/scripts/freespace.sh *)"
   "Bash(mo *)" "Bash(brew install *)" "Bash(command -v *)" "Bash(printf *)"
   "Bash(mktemp -d \"\$TMPDIR/diskdiet-XXXXXX\")" "Bash(df -k *)" "Bash(diskutil apfs list)" "Bash(tmutil listlocalsnapshots *)"

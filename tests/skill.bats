@@ -10,7 +10,10 @@ REMOVING=(
   "rm -rf /tmp/x" "brew install mole"
   "\${CLAUDE_SKILL_DIR}/scripts/../../../../bin/rm -rf x"
   "mo purge --dry-run --paths" "mo clean --dry-run --whitelist"
+  "MO_PURGE_SCAN_TIMEOUT_SEC=600 mo purge --yes" "MO_PURGE_SCAN_TIMEOUT_SEC=600 mo purge --dry-run --paths"
   "mdls -plist ~/.config/mole/whitelist /bin/ls" "mktemp -d ~/.config/mole/whitelist"
+  "\${CLAUDE_SKILL_DIR}/scripts/leftovers.sh remove x" "\${CLAUDE_SKILL_DIR}/scripts/leftovers.sh list remove x"
+  "\${CLAUDE_SKILL_DIR}/scripts/leftovers.sh remove --max x" "\${CLAUDE_SKILL_DIR}/scripts/leftovers.sh list --max remove x"
 )
 
 allowed_bash() { sed -n '/^allowed-tools:/,/^[^ ]/p' "$1" | sed -n 's/^  - Bash(\(.*\))$/\1/p'; }
@@ -41,10 +44,11 @@ granted() {
 }
 
 @test "allowed-tools still grants the dry runs and helper scripts" {
-  for s in 'guard.sh check x' 'guard.sh whitelist' 'metrics.sh collect' 'freespace.sh --free 1'; do
+  for s in 'guard.sh check x' 'guard.sh whitelist' 'metrics.sh collect' 'freespace.sh --total 1 --free 1 --max-used-pct 40' 'leftovers.sh list' 'leftovers.sh list --max'; do
     granted "\${CLAUDE_SKILL_DIR}/scripts/$s" "$SKILL_MD"
   done
   granted "mo clean --dry-run" "$SKILL_MD"
+  granted "MO_PURGE_SCAN_TIMEOUT_SEC=600 mo purge --dry-run" "$SKILL_MD"
   granted "mktemp -d \"\$TMPDIR/diskdiet-XXXXXX\"" "$SKILL_MD"
   granted "mdls -name kMDItemCFBundleIdentifier -raw /Applications/Foo.app" "$SKILL_MD"
   granted "mo uninstall --dry-run Foo" "$SKILL_MD"
@@ -75,7 +79,7 @@ granted() {
 }
 
 @test "snapshot stage runs only when snapshots exist, else is recorded not_applicable (US2.4)" {
-  stage=$(sed -n '/^## 4\. Snapshots/,/^## 5\./p' "$SKILL_MD")
+  stage=$(sed -n '/^## 5\. Snapshots/,/^## 6\./p' "$SKILL_MD")
   # shellcheck disable=SC2016 # literal backticks from SKILL.md
   grep -qF 'Only if `before.json` `snapshots.count` is above 0; else record `not_applicable`.' <<<"$stage"
 }

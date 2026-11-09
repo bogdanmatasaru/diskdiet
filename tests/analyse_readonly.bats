@@ -2,7 +2,7 @@ setup() {
   load helpers
   HOME=$(realpath "$HOME")
   export CLAUDE_SKILL_DIR="$TESTS_DIR/../skills/diskdiet"
-  export TMPDIR="$BATS_TEST_TMPDIR/t" FREE_GB=80 SWAP_GB=1 CACHES_GB=unknown
+  export TMPDIR="$BATS_TEST_TMPDIR/t" TOTAL_GB=500 FREE_GB=80 MAX_PCT=40
   mkdir -p "$TMPDIR"
   RUN=$(mktemp -d "$TMPDIR/diskdiet-XXXXXX")
   export RUN
